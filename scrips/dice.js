@@ -1,6 +1,6 @@
 
 const diceElement = document.getElementById('dice');
-const faces = {
+export const faces = {
     front: {
         normal: {x: 0, y: 0, z: -1}
     },
@@ -27,6 +27,10 @@ for (const faceName of ['front', 'back', 'left', 'right', 'top', 'bottom']) {
 
 const ROTATION_STEP = Math.PI / 2;
 
+window.addEventListener('keydown', event => {
+    triggerFrontFaceListener(event.key);
+});
+
 export function rollUp () {
     rotateDice('x', ROTATION_STEP);
 }
@@ -51,34 +55,12 @@ function rotateDice (axis, angle) {
 }
 
 /**
- * Replaces the content of the face.
- * @param {string} faceName
- * @param {Element} element 
- */
-export function setFaceContent (faceName, element) {
-    const face = faces[faceName].element;
-    face.innerHTML = '';
-    face.appendChild(element);
-}
-
-/**
- * Rotates all the normals of all the faces
- * @param {string} axis 
- * @param {number} angle 
- */
-function rotateAllNormals (axis, angle) {
-    for (const face of Object.values(faces)) {
-        face.normal = rotateVector(face.normal, axis, angle);
-    }
-}
-
-/**
  * Returns the vector rotated.
  * @param {{x: number, y: number, z: number}} vector 
  * @param {string} axis 
  * @param {number} angle 
  */
-function rotateVector (vector ,axis , angle) {
+ function rotateVector (vector ,axis , angle) {
     const x = vector.x;
     const y = vector.y;
     const z = vector.z;
@@ -114,11 +96,99 @@ function rotateVector (vector ,axis , angle) {
     return rotated;
 }
 
-function frontFacingFaceName () {
-    for (const [key, value] of Object.entries(faces)) {
-        if (value.normal.z == -1)
-            return key;
+/**
+ * Rotates all the normals of all the faces
+ * @param {string} axis 
+ * @param {number} angle 
+ */
+ function rotateAllNormals (axis, angle) {
+    for (const face of Object.values(faces)) {
+        face.normal = rotateVector(face.normal, axis, angle);
     }
+}
+
+/**
+ * Replaces the content of the face facing the direction relative to the camera
+ * @param {string} direction front, back, left, right, top or bottom 
+ * @param {{
+ *  element: Element,
+ *  eventListener: function 
+ * }} content 
+ */
+export function setFacingFaceContent (direction, content) {
+    const face = facingFace(direction);
+    face.element.innerHTML = '';
+    face.element.appendChild(content.element);
+    face.eventListener = content.eventListener;
+}
+
+/**
+ * Replaces the content of the face facing the direction relative to the camera.
+ * Then, rotates to that face.
+ * @param {string} direction up, down, left or right
+ * @param {{
+ *  element: Element,
+ *  eventListener: function 
+ * }} content 
+ */
+export function setFacingFaceContentAndRoll (direction, content) {
+    let faceDirection = 'back';
+    switch (direction) {
+        case 'up':
+            faceDirection = 'bottom';
+            break;
+        case 'down':
+            faceDirection = 'top';
+            break;
+        case 'left':
+            faceDirection = 'left';
+            break;
+        case 'right':
+            faceDirection = 'right';
+            break;
+    }
+
+    setFacingFaceContent(faceDirection, content);
+    switch (direction) {
+        case 'up':
+            rollUp();
+            break;
+        case 'down':
+            rollDown();
+            break;
+        case 'left':
+            rollLeft();
+            break;
+        case 'right':
+            rollRight();
+            break;
+    }
+}
+
+/**
+ * Returns the face facing the direction relative to the camera.
+ * @param {string} direction 
+ */
+function facingFace (direction) {
+    switch (direction) {
+        case 'front':
+            return Object.values(faces).find(f => f.normal.z == -1);
+        case 'back':
+            return Object.values(faces).find(f => f.normal.z == 1);
+        case 'left':
+            return Object.values(faces).find(f => f.normal.x == -1);
+        case 'right':
+            return Object.values(faces).find(f => f.normal.x == 1);
+        case 'top':
+            return Object.values(faces).find(f => f.normal.y == 1);
+        case 'bottom':
+            return Object.values(faces).find(f => f.normal.y == -1);
+    }
+}
+
+function triggerFrontFaceListener (key) {
+    const face = facingFace('front');
+    face.eventListener(key);
 }
 
 window.rollUp = rollUp;
@@ -126,4 +196,3 @@ window.rollDown = rollDown;
 window.rollLeft = rollLeft;
 window.rollRight = rollRight;
 window.faces = faces;
-window.frontFacingFaceName = frontFacingFaceName;

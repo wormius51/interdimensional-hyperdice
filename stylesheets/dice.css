@@ -60,3 +60,15 @@
 .bottom {
     transform: rotateX(-0.25turn) translateZ(calc(var(--scale) / 2));
 }
+
+.dotsTable td {
+    width: calc(var(--scale) / 3);
+    height: calc(var(--scale) / 3);
+    text-align: center;
+    font-size: calc(var(--scale) / 7);
+    transform: translateY(calc(var(--scale) / -32));
+}
+
+.problem {
+    font-size: calc(var(--scale) / 7);
+}
