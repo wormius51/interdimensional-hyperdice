@@ -12,16 +12,12 @@
 
 #dice {
     --scale: 300px;
-    --x-rotation: 0turn;
-    --y-rotation: 0turn;
-    --z-rotation: 0turn;
     margin: auto;
     border-spacing: 0px;
     width: var(--scale);
     height: var(--scale);
     transform-style: preserve-3d;
     transition: transform .3s ease-in;
-    transform: rotateX(var(--x-rotation)) rotateY(var(--y-rotation)) rotateZ(var(--z-rotation));
 }
 
 .face {
